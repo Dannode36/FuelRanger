@@ -21,8 +21,8 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface GitHubService {
-    @GET("users/{user}/repos")
-    fun listRepos(@Path("user") user: String?): Call<ResponseBody>?
+    @GET("stations/{code}")
+    fun getStationPrices(@Path("code") code: Int?): Call<ResponseBody>?
 }
 
 class MainActivity : ComponentActivity() {
@@ -41,13 +41,14 @@ class MainActivity : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
+            .baseUrl("http://192.168.20.72:5179/")
             .build()
 
         val service = retrofit.create(GitHubService::class.java)
-        service.listRepos("octocat")?.enqueue(object : Callback<ResponseBody?> {
+        service.getStationPrices(972)?.enqueue(object : Callback<ResponseBody?> {
             override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                println(t.message)
             }
 
             override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
