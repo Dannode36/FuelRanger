@@ -1,26 +1,34 @@
 package com.example.fuelranger
 
+import com.google.gson.annotations.SerializedName
+
 data class StationPrices(
-    var station: Station = Station(),
-    var prices: MutableList<FuelPrice> = mutableListOf()
+    @SerializedName("station")
+    val station: Station = Station(),
+    @SerializedName("prices")
+    val prices: MutableList<FuelPrice> = mutableListOf()
 )
 
 data class Station(
-    var brandId: String = "",
-    var stationId: String = "",
-    var brand: String = "",
-    var code: String = "",
-    var name: String = "",
-    var address: String = "",
-    var location: Location = Location(0.0, 0.0),
-    var isAdBlueAvailable: Boolean = false
+    val brandId: String = "",
+    val stationId: String = "",
+    val brand: String = "",
+    val code: String = "",
+    val name: String = "",
+    val address: String = "",
+    val location: Location = Location(0.0, 0.0),
+    val isAdBlueAvailable: Boolean = false
 )
 
 data class FuelPrice(
-    var stationCode: String,
-    var fuelType: String,
-    var price: Double,
-    var lastUpdated: String
+    @SerializedName("stationcode")
+    val stationCode: String = "",
+    @SerializedName("fueltype")
+    val fuelType: String = "",
+    @SerializedName("price")
+    val price: Double = 0.0,
+    @SerializedName("lastupdated")
+    val lastUpdated: String = ""
 )
 
 data class Location(

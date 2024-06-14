@@ -47,7 +47,8 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.gson)
+    implementation(libs.converter.gson)
     implementation(libs.retrofit)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
