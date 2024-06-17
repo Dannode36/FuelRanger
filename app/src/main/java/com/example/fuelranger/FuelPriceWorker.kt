@@ -25,6 +25,7 @@ import android.Manifest
 import android.util.Log
 import androidx.work.Data
 import androidx.work.ForegroundInfo
+import retrofit2.Response
 import retrofit2.converter.gson.GsonConverterFactory
 
 interface FuelApiInterface {
@@ -34,27 +35,27 @@ interface FuelApiInterface {
 }
 class FuelPriceWorker(appContext: Context, workerParams: WorkerParameters): Worker(appContext, workerParams) {
     private val notificationChannelId = "fuelRangerPriceNotification"
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("http://192.168.20.72:5179/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-    private fun createNotificationChannel()
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                notificationChannelId,
-                "DemoWorker",
-                NotificationManager.IMPORTANCE_LOW,
-            )
+    private fun createNotificationChannel() {
+        val notificationChannel = NotificationChannel(
+            notificationChannelId,
+            "DemoWorker",
+            NotificationManager.IMPORTANCE_LOW,
+        )
 
-            val notificationManager: NotificationManager? =
-                getSystemService(
-                    applicationContext,
-                    NotificationManager::class.java)
+        val notificationManager: NotificationManager? =
+            getSystemService(
+                applicationContext,
+                NotificationManager::class.java)
 
-            notificationManager?.createNotificationChannel(
-                notificationChannel
-            )
-        }
+        notificationManager?.createNotificationChannel(
+            notificationChannel
+        )
     }
-
     private fun createNotification(content: String) : Notification {
         createNotificationChannel()
 
@@ -84,12 +85,19 @@ class FuelPriceWorker(appContext: Context, workerParams: WorkerParameters): Work
             .build()
     }
 
-    override fun doWork(): Result {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.20.72:5179/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+    fun GetStationPricesInRadius(): Response<List<StationPrices>> {
+        val service = retrofit.create(FuelApiInterface::class.java)
+        val response = service.getStationPricesInRadius(-33.505830, 151.331460, 10000.0, "P95").execute()
+        if(!response.isSuccessful){
+            error("API request failed. Status code: " + response.code())
+        }
+        println(response.toString())
+        println("success")
 
+        return response
+    }
+
+    override fun doWork(): Result {
         try {
             val service = retrofit.create(FuelApiInterface::class.java)
             val response = service.getStationPricesInRadius(-33.505830, 151.331460, 10000.0, "P95").execute()
