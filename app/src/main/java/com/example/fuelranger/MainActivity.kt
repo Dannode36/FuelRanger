@@ -27,11 +27,21 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.fuelranger.ui.theme.FuelRangerTheme
 import android.Manifest
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.work.ExistingPeriodicWorkPolicy
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
+    private val fuelTypes = listOf("E10", "P91", "P95", "P98")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -62,6 +72,7 @@ class MainActivity : ComponentActivity() {
                         name = "Under construction...",
                         modifier = Modifier.padding(innerPadding)
                     )
+                    FuelTypeCheckboxList(fuelTypes)
                 }
             }
         }
@@ -85,33 +96,50 @@ fun GreetingPreview() {
 }
 
 @Composable
+fun FuelTypeCheckboxList(fuelTypes: List<String>) {
+
+    Column {
+        for (type in fuelTypes){
+            var checked by remember { mutableStateOf(true) }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(type)
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = { checked = it }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun RuntimePermissionsDialog(
     permission: String,
     onPermissionGranted: () -> Unit,
     onPermissionDenied: () -> Unit,
 ) {
 
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    if (ContextCompat.checkSelfPermission(
+            LocalContext.current,
+            permission) != PackageManager.PERMISSION_GRANTED) {
 
-        if (ContextCompat.checkSelfPermission(
-                LocalContext.current,
-                permission) != PackageManager.PERMISSION_GRANTED) {
+        val requestLocationPermissionLauncher =
+            rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
 
-            val requestLocationPermissionLauncher =
-                rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted: Boolean ->
-
-                    if (isGranted) {
-                        onPermissionGranted()
-                    } else {
-                        onPermissionDenied()
-                    }
+                if (isGranted) {
+                    onPermissionGranted()
+                } else {
+                    onPermissionDenied()
                 }
-
-            SideEffect {
-                requestLocationPermissionLauncher.launch(permission)
             }
+
+        SideEffect {
+            requestLocationPermissionLauncher.launch(permission)
         }
     }
 }
